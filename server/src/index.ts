@@ -22,6 +22,39 @@ const app = new Elysia({ prefix: "/api" })
       body: t.Array(AnalyticsEventInputCreate),
     }
   )
+  .get(
+    "/metrics/:event?",
+    async ({ params, query }) => {
+      const limit = Math.min(query.limit ?? 50, 200);
+      const cursor = query.cursor;
+
+      const metrics = await prisma.analyticsEvent.findMany({
+        where: {
+          ...(params.event && { event: params.event }),
+        },
+        orderBy: { id: "desc" },
+        take: limit,
+        ...(cursor && {
+          cursor: { id: cursor },
+          skip: 1,
+        }),
+      });
+
+      const nextCursor =
+        metrics.length > 0 ? metrics[metrics.length - 1].id : null;
+
+      return {
+        data: metrics,
+        nextCursor,
+      };
+    },
+    {
+      query: t.Object({
+        limit: t.Optional(t.Numeric()),
+        cursor: t.Optional(t.Numeric()),
+      }),
+    }
+  )
   .listen(3000);
 
 console.log(
