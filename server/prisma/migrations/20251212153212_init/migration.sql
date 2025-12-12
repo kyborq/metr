@@ -1,0 +1,7 @@
+-- CreateTable
+CREATE TABLE "AnalyticsEvent" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "event" TEXT NOT NULL,
+    "props" JSONB,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

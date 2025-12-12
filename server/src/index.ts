@@ -2,7 +2,9 @@ import { Elysia, t } from "elysia";
 import { config } from "dotenv";
 
 import { auth } from "./plugins/auth";
-import { result } from "./utils/result";
+import prisma from "./prisma";
+
+import { AnalyticsEventInputCreate } from "../generated/prismabox/AnalyticsEvent";
 
 config();
 
@@ -11,15 +13,13 @@ const app = new Elysia({ prefix: "/api" })
   .post(
     "/track",
     async ({ body }) => {
-      return result("ok");
+      const result = await prisma.analyticsEvent.createMany({
+        data: body,
+      });
+      return result;
     },
     {
-      body: t.Array(
-        t.Object({
-          event: t.String(),
-          props: t.Optional(t.Object({})),
-        })
-      ),
+      body: t.Array(AnalyticsEventInputCreate),
     }
   )
   .listen(3000);
